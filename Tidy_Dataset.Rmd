@@ -1,0 +1,24 @@
+---
+title: "Semester Project"
+author: "Francis Troy Kirinhakone"
+date: "10/8/2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Analysis of Consumer Behavior
+
+```{r}
+require(xlsx)
+geo_loc = read.csv(file="/Users/troy/Documents/brazilian-ecommerce/geolocation_olist_public_dataset.csv")
+classified = read.csv(file="/Users/troy/Documents/brazilian-ecommerce/olist_classified_public_dataset.csv")
+dataset = read.csv(file="/Users/troy/Documents/brazilian-ecommerce/olist_public_dataset_v2.csv")
+customers = read.csv(file="/Users/troy/Documents/brazilian-ecommerce/olist_public_dataset_v2_customers.csv")
+payments = read.csv(file="/")
+Users⁩ ▸ ⁨troy⁩ ▸ ⁨Google Drive⁩ ▸ ⁨#FALL_2018_WSU⁩ ▸ ⁨data_science⁩ ▸ ⁨Project⁩ ▸ ⁨brazilian-ecommerce⁩
+View(test)
+```
+
