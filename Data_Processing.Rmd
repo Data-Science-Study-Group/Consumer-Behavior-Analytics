@@ -1,0 +1,56 @@
+---
+title: "Data Processing"
+author: "Francis Troy Kirinhakone & Carlos HeHe"
+date: "11/12/2018"
+output: html_document
+---
+#Import library and datasets
+```{r}
+library(dplyr)
+customers = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_customers_dataset.xls")
+geolocation = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_geolocation_dataset.xls")
+order_items = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_order_items_dataset.xls")
+order_payments = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_order_payments_dataset.xls")
+order_reviews = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_order_reviews_dataset.xls")
+orders = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_orders_dataset.xls")
+products = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_products_dataset.xls")
+sellers = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_sellers_dataset.xls")
+product_category = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/product_category_name_translation.xls")
+```
+
+#Description of the attributes of each dataset
+```{r}
+names(customers)
+```
+```{r}
+names(geolocation)
+```
+```{r}
+names(order_items)
+```
+```{r}
+order_payments %>%
+  names()
+```
+```{r}
+order_reviews %>%
+  names()
+```
+```{r}
+orders %>% names()
+```
+```{r}
+product_category %>% names()
+```
+```{r}
+products %>% names()
+```
+```{r}
+sellers %>% names()
+```
+
+#Exploratory Data Analysis Stage
+```{r}
+customers %>%
+```
+
