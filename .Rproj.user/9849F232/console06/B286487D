@@ -1,0 +1,3 @@
+]0;~/GitHub/datasci_proj[?1034hTroys-MacBook-Pro:datasci_proj troy$ [KTroys-MacBook-Pro:datasci_proj troy$ product_category = readxl::read_xls(path = "~/GitHub/d atasci_proj/brazilian-ecommerce_ver6/product_category_name_translation.xls")
+bash: syntax error near unexpected token `('
+]0;~/GitHub/datasci_projTroys-MacBook-Pro:datasci_proj troy$ [KTroys-MacBook-Pro:datasci_proj troy$ 

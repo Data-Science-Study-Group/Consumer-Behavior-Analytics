@@ -1,0 +1,111 @@
+---
+title: "Assignment 4 - Linear Regression"
+author: "Francis Troy Kirinhakone"
+date: "10/10/2018"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r}
+library(dplyr)
+library(MASS)
+library(ISLR)
+Auto <- read.csv("https://scads.eecs.wsu.edu/wp-content/uploads/2017/09/Auto.csv")
+```
+
+#Check for and remove any missing values
+```{r}
+sum(is.null(Auto))
+```
+There are no missing values in the data set.
+
+#Produce scatterplot of dataset
+Since name is qualitative making a scatter plot does not provide any useful information, we will remove this.
+```{r}
+auto_df <- Auto[,!colnames(Auto) %in% c("name")]
+plot(auto_df, main = "Scatterplot", col=4)
+```
+Taking an initial look at the scatter plot above we can see general trends of positive and negative correlations. We can also notice clusters or groups within each graph. We can see how origin is probably categorical with 3 values as there are only three lines. We can see that cylinders is a type of small interval as well. These types intuitively is most likely discrete values. Looking at the data, we can confirm this.
+
+#Create matrix of correlations from the quantitative data.
+```{r}
+auto_df$horsepower =  as.numeric(auto_df$horsepower) #prase horsepower factor to numeric type
+
+auto_df_cor <- cor(auto_df, auto_df) #create cor matrix
+auto_df_cor
+```
+
+#use lm() for multi. linar regression
+```{r}
+lin.fit = lm( mpg ~ cylinders + displacement + horsepower + weight + acceleration + year + origin, data = auto_df)
+summary(lin.fit)
+
+lin.fit
+```
+####Which predictors appear to have a statistically significant relationship to the response, and how do you determine this?
+Looking at the summary of the linear regression performed to predict mpg from cylinders, displacement, horsepower, weight, acceleration, year and origin we can say the following. 
+
+####What does the coefficient for the cylinders variable suggest, in simple terms?
+The coef for cylinders can be interpreted as the following. Estimate is the value of mpg when cylinder = 0. In algebraic terms, it is where the linear regression line would cross the x axis at 0. Simply put, with 0 cylinders, mpg would be approx. .3 which doesn't mean too much in this situation. Reason being that a car without a cylinder implied there is no engine, the car may as well be rolling down a street.
+
+
+#use plot() to create a diagnostic plot for a linear reg fit.
+```{r}
+par(mfrow=c(1,1))
+plot(lin.fit, pch=16)
+```
+**Do the residual plots suggest any unusually large outliers?**
+Residual plots suggests that points 323, 327, and 326 are unusually large. Looking at the Normal Q-Q plot we see that most of the data is normally distributed except a cluster including the previously mentioned points. The graph does not state the specific points although the 6 points preceding our outlines are also unusually large. The break from the line implies a potential bi modal distribution. The points at the beginning of the tail I would say is still fairly normal.
+
+Scale-location is fairly horizontal line which means we have a pretty good amount of spread with out data.
+
+
+**Does the leverage plot identify any observations with unusually high leverage?**
+Residuals vs. Leverage : We see that points 327,394, and 14 have the greatest influence on our results. Given how far they are from the normal distribution, this makes sense.
+
+#Utilizing interaction effects
+```{r}
+summary(lm(mpg~cylinders*displacement,data=auto_df))
+
+lm(mpg~cylinders:displacement,data=auto_df) %>%
+  summary()
+```
+
+
+
+
+#Problem 2
+Utilizing Boston data set, we are predicting per capita crime.
+
+Let's take a look at our the attributes of our data set.
+```{r}
+names(Boston)
+length(Boston)
+sapply(Boston,class)
+```
+We see that we are dealing with 14 attribute variables, all of which are numeric or integer types.
+
+Let's now check for missing data.
+```{r}
+sum(is.na(Boston))
+sum(is.null(Boston))
+```
+
+To gain a general perspective of the data trends, a scatter plot would be useful. With the number of attributes, I'll break the scatter plot into two sections. The first 7 then the last 7 for readability purposes.
+```{r}
+
+plot(Boston[1:14], col=4)
+```
+
+
+Furthermore in order to gain some insight on how the variables are related to predicting per capita crime. We will utilize linear regression.
+```{r}
+lm(crim ~ zn, data=Boston)
+```
+
+
+
+
+#Problem 3
+

@@ -1,0 +1,16 @@
+"0","order_reviews %>%
+  names()
+"
+"1","[1]"
+"1"," ""review_id""              "
+"1"," ""order_id""               "
+"1"," ""review_score""           "
+"1"," ""review_comment_title""   "
+"1","
+"
+"1","[5]"
+"1"," ""review_comment_message"" "
+"1"," ""review_creation_date""   "
+"1"," ""review_answer_timestamp"""
+"1","
+"

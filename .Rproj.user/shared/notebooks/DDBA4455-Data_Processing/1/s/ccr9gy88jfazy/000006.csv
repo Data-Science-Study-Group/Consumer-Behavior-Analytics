@@ -1,0 +1,11 @@
+"0","order_payments %>%
+  names()
+"
+"1","[1]"
+"1"," ""order_id""            "
+"1"," ""payment_sequential""  "
+"1"," ""payment_type""        "
+"1"," ""payment_installments"""
+"1"," ""payment_value""       "
+"1","
+"

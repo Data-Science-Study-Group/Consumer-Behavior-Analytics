@@ -1,0 +1,5 @@
+"0","temp$`customers$customer_id` = data.frame(lapply(temp$customers.customer_id, as.numeric))
+"
+"2","Error in `$<-.data.frame`(`*tmp*`, `customers$customer_id`, value = list()) : 
+  replacement has 0 rows, data has 16383
+"

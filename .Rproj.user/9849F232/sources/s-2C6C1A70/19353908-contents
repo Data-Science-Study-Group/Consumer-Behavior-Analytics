@@ -1,0 +1,79 @@
+---
+title: "Data Processing"
+author: "Francis Troy Kirinhakone & Carlos HeHe"
+date: "11/12/2018"
+output: html_document
+---
+#Import library and datasets
+```{r}
+library(tidyverse)
+customers = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_customers_dataset.xls")
+geolocation = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_geolocation_dataset.xls")
+order_items = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_order_items_dataset.xls")
+order_payments = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_order_payments_dataset.xls")
+order_reviews = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_order_reviews_dataset.xls")
+orders = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_orders_dataset.xls")
+products = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_products_dataset.xls")
+sellers = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_sellers_dataset.xls")
+product_category = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/product_category_name_translation.xls")
+```
+
+#Description of the attributes of each dataset
+```{r}
+names(customers)
+```
+```{r}
+names(geolocation)
+```
+```{r}
+names(order_items)
+```
+```{r}
+order_payments %>%
+  names()
+```
+```{r}
+order_reviews %>%
+  names()
+```
+```{r}
+orders %>% names()
+```
+```{r}
+product_category %>% names()
+```
+```{r}
+products %>% names()
+```
+```{r}
+sellers %>% names()
+```
+
+#Exploratory Data Analysis Stage
+```{r}
+order_items$price %>%
+  summary()
+
+order_items %>% arrange(desc(price)) %>%
+   select(price, everything()) #place price as the first column
+```
+We see that there is an outlier at the max of 6735. Maybe we should exclude this point?
+
+What the correlation between customer_id and price?
+```{r}
+temp = data.frame(customers$customer_unique_id)
+temp%>%mutate(customers$customer_id)->temp
+temp%>%mutate(order_items$price) -> temp
+temp%>%arrange(customers.customer_unique_id)
+temp%>%arrange(customers$customer_id)
+
+class(temp$`customers$customer_id`)#factor type...need to convert to string
+class(temp$`order_items$price`)
+temp$`customers$customer_id` = data.frame(lapply(temp$customers.customer_id, as.numeric))
+class(temp$`customers$customer_id`)
+View(test)
+plot(temp$`customers$customer_id`,temp$`order_items$price`)
+```
+
+
+

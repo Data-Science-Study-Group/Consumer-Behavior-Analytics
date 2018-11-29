@@ -1,0 +1,24 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1542068892414.000,
+    "dirty" : true,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "915641811",
+    "id" : "19353908",
+    "lastKnownWriteTime" : 1543418632,
+    "last_content_update" : 1543467074981,
+    "path" : "~/GitHub/datasci_proj/Data_Processing.Rmd",
+    "project_path" : "Data_Processing.Rmd",
+    "properties" : {
+        "cursorPosition" : "71,15",
+        "marks" : "<:8,8\n>:8,8",
+        "scrollLine" : "51",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}
