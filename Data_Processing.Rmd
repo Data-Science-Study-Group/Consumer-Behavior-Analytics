@@ -76,8 +76,15 @@ class(temp$`order_items$price`)
 ```
 Now use the plot fuction to product a scatter plot(x,y) x = customer_unique_id, y = order_items$price
 ```{r}
-plot(temp$customers.customer_unique_id,temp$`order_items$price`)
+plot(temp$customers.customer_unique_id,temp$`order_items$price`, 
+     bty=n,
+     col="red",
+     main="Customer to Item Price",
+     xlab="Customer_Unique_id",
+     ylab="Item_Price",
+     cex.axis=.5)
 ```
+
 
 
 
