@@ -82,8 +82,12 @@ plot(temp$customers.customer_unique_id,temp$`order_items$price`,
      main="Customer to Item Price",
      xlab="Customer_Unique_id",
      ylab="Item_Price",
-     cex.axis=.5)
+     cex.axis=.5,
+     pch=16)
 ```
+Looking at the plot we see there are a few outliers. So we can say that there's a few high end purchases that are infrequent. These points may skew our model and should be exluded.
+
+
 
 
 
