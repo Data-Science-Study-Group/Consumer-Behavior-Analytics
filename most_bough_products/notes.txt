@@ -1,0 +1,17 @@
+olist_order_items_dataset - there are more total rows than the other files, my guess is because every single ordered product has it's own row.
+^^while other files have the entire order as its own row.
+
+
+Process:
+Copied over order_items_data_set
+copied over columns product_id and product_category name from olist_products_dataset
+Made a new column for product_category name with both product_id columns.
+Copied over product_category_name and then did a vlookup to translate.
+
+Most freq bought products - 
+bed_bath_table - 11,115
+health_beauty - 9,670
+
+Most spent
+health_beauty - 1,258,681.34
+watches_gifts = 1,205,005.68
