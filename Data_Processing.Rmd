@@ -7,6 +7,8 @@ output: html_document
 #Import library and datasets
 ```{r}
 library(tidyverse)
+library(ggplot2)
+library(date)
 customers = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_customers_dataset.xls")
 geolocation = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_geolocation_dataset.xls")
 order_items = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_order_items_dataset.xls")
@@ -84,10 +86,101 @@ plot(temp$customers.customer_unique_id,temp$`order_items$price`,
      ylab="Item_Price",
      cex.axis=.5,
      pch=16)
+
+qplot(data=temp,x=temp$customers.customer_unique_id,y=temp$`order_items$price`)
 ```
 Looking at the plot we see there are a few outliers. So we can say that there's a few high end purchases that are infrequent. These points may skew our model and should be exluded.
 
+Since most of the data is under 2000 approx. Lets filter those points out.
+```{r}
+df_cust_price = temp
 
+df_cust_price %>% 
+  filter(`order_items$price` < 5) -> df_cust_price_new
+
+df_cust_price_new
+  
+qplot(df_cust_price_new, aes(df_cust_price_new$customers.customer_unique_id, df_cust_price_new$`order_items$price`))
+```
+
+
+Curious if we group the customers by zipcode.
+```{r}
+temp %>%
+  mutate(customers$customer_zip_code_prefix) %>%
+  group_by(customers$customer_zip_code_prefix) -> temp
+
+temp %>% arrange(`customers$customer_zip_code_prefix`) %>%
+    select(`customers$customer_zip_code_prefix`,everything())
+
+ggplot(temp, aes(x=temp$customers.customer_unique_id,y=temp$`order_items$price`))
+
+qplot(x=temp$customers.customer_unique_id,y=temp$`order_items$price`,data=temp, color=temp$`customers$customer_zip_code_prefix`) + geom_point() + coord_fixed(2)
+```
+How have orders progressed over time?
+Let's find out with payments dataset for y val, and x = order_purchase_timestamp.
+```{r}
+df = data.frame(order_payments$payment_value,orders$order_purchase_timestamp)
+
+qplot(x=df$orders.order_purchase_timestamp,y=df$order_payments.payment_value,data=df, color="red")
+```
+We see that we have a gap in the data before jan 2017. 
+
+Curious of the frequency of buyers from various zip codes.
+```{r}
+as.data.frame(table(customers$customer_zip_code_prefix)) %>% 
+  arrange(desc(Freq)) -> zip_df
+
+zip_df
+
+ggplot(zip_df, aes(x=zip_df$Var1)) + geom_bar()
+
+animals = c("cat","dog","bird","cat")
+class(animals)
+ggplot(data.frame(animals), aes(x=animals)) + geom_bar()
+```
+
+#Price to zipcode
+
+```{r}
+df = data.frame(customers$customer_id,order_payments$payment_type)
+df
+table(df$order_payments.payment_type) %>%
+barplot()
+
+df %>% mutate(orders$customer_id, customers$customer_city, customers$customer_state) -> df
+summary(df)
+
+qplot(x = df$`customers$customer_city`,y = df$order_payments.payment_type)
+
+table(df$`customers$customer_city`, df$order_payments.payment_type) -> tbl_1
+as.data.frame.matrix(tbl_1) -> new_df
+
+View(new_df)
+
+rownames_to_column(df = new_df,var = "city_name") %>%
+  filter(debit_card > 0) %>% 
+  column_to_rownames('city_name') -> df_debitcard
+
+
+#barplot(t(as.matrix(df_debitcard)), beside = TRUE )
+df_debitcard %>%
+  as.matrix() %>%
+  t() %>%
+  barplot(beside = TRUE)
+
+df_debitcard$city = row.names(df_debitcard)
+
+?`stringr-package`
+```
+
+Machine Learning
+need to find the shipping speed of dates.
+```{r}
+orders -> df
+
+?date
+```
 
 
 
