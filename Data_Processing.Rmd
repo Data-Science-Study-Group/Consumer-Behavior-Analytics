@@ -1,0 +1,234 @@
+---
+title: "Data Processing"
+author: "Francis Troy Kirinhakone & Carlos HeHe"
+date: "11/12/2018"
+output: html_document
+---
+#Import library and datasets
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(date)
+customers = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_customers_dataset.csv")
+geolocation = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_geolocation_dataset.csv")
+order_items = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_order_items_dataset.csv")
+order_payments = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_order_payments_dataset.csv")
+order_reviews = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_order_reviews_dataset.csv")
+orders = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_orders_dataset.csv",na.strings = c("","NA"))
+products = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_products_dataset.csv")
+sellers = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_sellers_dataset.csv")
+product_category = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/product_category_name_translation.csv")
+```
+
+#Description of the attributes of each dataset
+```{r}
+names(customers)
+```
+```{r}
+names(geolocation)
+```
+```{r}
+names(order_items)
+```
+```{r}
+order_payments %>%
+  names()
+```
+```{r}
+order_reviews %>%
+  names()
+```
+```{r}
+orders %>% names()
+```
+```{r}
+product_category %>% names()
+```
+```{r}
+products %>% names()
+```
+```{r}
+sellers %>% names()
+```
+
+
+#Exploratory Data Analysis Stage
+```{r}
+order_items$price %>%
+  summary()
+
+order_items %>% arrange(desc(price)) %>%
+   select(price, everything()) #place price as the first column
+```
+We see that there is an outlier at the max of 6735. Maybe we should exclude this point?
+
+#What the correlation between customer_id and price?
+
+Prep the dataframe, temp, to plot.
+```{r}
+temp = data.frame(customers$customer_unique_id)
+temp%>%mutate(customers$customer_id) -> temp
+temp%>%mutate(orders$)
+temp%>%arrange(customers.customer_unique_id)
+temp%>%arrange(customers$customer_id)
+
+##find class type
+class(temp$customers.customer_unique_id)#factor type...need to convert to string
+class(temp$`customers$customer_id`)
+class(temp$`order_items$price`)
+```
+Now use the plot fuction to product a scatter plot(x,y) x = customer_unique_id, y = order_items$price
+```{r}
+plot(temp$customers.customer_unique_id,temp$`order_items$price`, 
+     bty=n,
+     col="red",
+     main="Customer to Item Price",
+     xlab="Customer_Unique_id",
+     ylab="Item_Price",
+     cex.axis=.5,
+     pch=16)
+
+qplot(data=temp,x=temp$customers.customer_unique_id,y=temp$`order_items$price`)
+```
+Looking at the plot we see there are a few outliers. So we can say that there's a few high end purchases that are infrequent. These points may skew our model and should be exluded.
+
+Since most of the data is under 2000 approx. Lets filter those points out.
+```{r}
+df_cust_price = temp
+
+df_cust_price %>% 
+  filter(`order_items$price` < 5) -> df_cust_price_new
+
+df_cust_price_new
+  
+qplot(df_cust_price_new, aes(df_cust_price_new$customers.customer_unique_id, df_cust_price_new$`order_items$price`))
+```
+
+
+Curious if we group the customers by zipcode.
+```{r}
+temp %>%
+  mutate(customers$customer_zip_code_prefix) %>%
+  group_by(customers$customer_zip_code_prefix) -> temp
+
+temp %>% arrange(`customers$customer_zip_code_prefix`) %>%
+    select(`customers$customer_zip_code_prefix`,everything())
+
+ggplot(temp, aes(x=temp$customers.customer_unique_id,y=temp$`order_items$price`))
+
+qplot(x=temp$customers.customer_unique_id,y=temp$`order_items$price`,data=temp, color=temp$`customers$customer_zip_code_prefix`) + geom_point() + coord_fixed(2)
+```
+How have orders progressed over time?
+Let's find out with payments dataset for y val, and x = order_purchase_timestamp.
+```{r}
+df = data.frame(order_payments$payment_value,orders$order_purchase_timestamp)
+
+qplot(x=df$orders.order_purchase_timestamp,y=df$order_payments.payment_value,data=df, color="red")
+```
+We see that we have a gap in the data before jan 2017. 
+
+Curious of the frequency of buyers from various zip codes.
+```{r}
+as.data.frame(table(customers$customer_zip_code_prefix)) %>% 
+  arrange(desc(Freq)) -> zip_df
+
+zip_df
+
+ggplot(zip_df, aes(x=zip_df$Var1)) + geom_bar()
+
+animals = c("cat","dog","bird","cat")
+class(animals)
+ggplot(data.frame(animals), aes(x=animals)) + geom_bar()
+```
+
+#Price to zipcode
+
+```{r}
+df = data.frame(customers$customer_id,order_payments$payment_type)
+df
+table(df$order_payments.payment_type) %>%
+barplot()
+
+df %>% mutate(orders$customer_id, customers$customer_city, customers$customer_state) -> df
+summary(df)
+
+qplot(x = df$`customers$customer_city`,y = df$order_payments.payment_type)
+
+table(df$`customers$customer_city`, df$order_payments.payment_type) -> tbl_1
+as.data.frame.matrix(tbl_1) -> new_df
+
+View(new_df)
+
+rownames_to_column(df = new_df,var = "city_name") %>%
+  filter(debit_card > 0) %>% 
+  column_to_rownames('city_name') -> df_debitcard
+
+
+#barplot(t(as.matrix(df_debitcard)), beside = TRUE )
+df_debitcard %>%
+  as.matrix() %>%
+  t() %>%
+  barplot(beside = TRUE)
+
+df_debitcard$city = row.names(df_debitcard)
+
+?`stringr-package`
+```
+#Split into quarters
+```{r}
+orders_Q1 <- orders #set Q1 with orders
+#split orders purchased into distinct columns
+orders_Q1$order_purchase_timestamp %>%
+  str_split_fixed(pattern = " ", 2) -> temp
+
+#keep only dates
+temp[,1] -> temp
+
+#push back onto Q1
+mutate(orders_Q1, temp) -> orders_Q1
+View(orders_Q1)
+class(orders_Q1$temp)#is character type, must be date type
+
+orders_Q1$temp <- as.Date(orders_Q1$temp, format= "%Y-%m-%d")
+#sort out only Q1 of 2017
+subset(orders_Q1, temp > "2014-01-01" & temp < "2017-01-01") -> 
+
+summary(orders_Q1)
+```
+```{r}
+summary(orders)
+```
+
+
+
+#Split into training and test set
+
+Machine Learning
+need to find the shipping speed of dates.
+```{r}
+orders -> df
+
+?date
+```
+#Link price to customer + plot
+```{r}
+merge(orders,order_items, by="order_id") -> df1
+df1 <- merge(df1, customers, by="customer_id")
+df1 %>% 
+  filter(price < 5) -> df1
+
+ggplot(df1, aes(x=customer_id, y=price)) + geom_point()
+```
+EDA: Orders
+```{r}
+View(orders)
+orders[7,6] %>%
+  View()
+```
+
+```{r}
+
+```
+
+
+
