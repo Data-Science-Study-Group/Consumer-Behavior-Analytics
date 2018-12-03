@@ -245,6 +245,19 @@ t2 = strptime(dates[,6], format = "%H:%M")
 dates$time_difference_min = difftime(t2,t1, units = "min") #as.numeric
 dates$time_difference_min = lapply(dates[,8], function(x)(if(is.na(x) != TRUE && x < 0){x * -1} else{x})) #turn all values positive
 
+#get total difference in of days and minutes combined
+temp = data[,c(1,2)] #get the first two columns
+temp$customer_id = NULL #erase the second column
+temp$days = dates$day_difference
+temp$min = dates$time_difference_min
+temp$days_min = temp$days * 1440 #24 * 60 = 1440
+temp$total_min = temp$days_min + as.numeric(temp$min) #add all the minutes together
+
+total_diff_min = temp[c(1,5)]
+
+dates
+total_diff_min
+
 
 
 ```

@@ -4,7 +4,7 @@ library(tidyverse)
 library(stringr)
 
 #load data
-data = read.csv("C:/Users/Carlos/Desktop/Project/Seq payments/olist_orders_dataset.csv")
+data = read.csv("~/GitHub/datasci_proj/delivery_speed/olist_orders_dataset.csv")
 
 #get the two columns we need
 dates = data[,c(4,6)]
@@ -23,11 +23,6 @@ dates$pasred_deliver_carrier_date =
 dates$pasred_deliver_carrier_time = 
   lapply(dates[,2], function(x) (str_split_fixed(x," ",2)[2]))
 
-#example on how to take the difference in days off two dates.
-#date_strings = c("1/2/2013", "1/3/2013")
-#datetimes = strptime(date_strings, format = "%m/%d/%Y")
-#difftime(datetimes[1], datetimes[2], units = "days") # days
-
 #calculate the difference in days
 d1 = strptime(dates[,3],format = "%m/%d/%Y")
 d2 = strptime(dates[,5],format = "%m/%d/%Y")
@@ -39,3 +34,13 @@ t2 = strptime(dates[,6], format = "%H:%M")
 dates$time_difference_min = difftime(t2,t1, units = "min") #as.numeric
 dates$time_difference_min = lapply(dates[,8], function(x)(if(is.na(x) != TRUE && x < 0){x * -1} else{x})) #turn all values positive
 
+
+#get total difference in of days and minutes combined
+temp = data[,c(1,2)] #get the first two columns
+temp$customer_id = NULL #erase the second column
+temp$days = dates$day_difference
+temp$min = dates$time_difference_min
+temp$days_min = temp$days * 1440 #24 * 60 = 1440
+temp$total_min = temp$days_min + as.numeric(temp$min) #add all the minutes together
+
+total_diff_min = temp[c(1,5)]
