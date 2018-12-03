@@ -44,3 +44,4 @@ temp$days_min = temp$days * 1440 #24 * 60 = 1440
 temp$total_min = temp$days_min + as.numeric(temp$min) #add all the minutes together
 
 total_diff_min = temp[c(1,5)]
+
