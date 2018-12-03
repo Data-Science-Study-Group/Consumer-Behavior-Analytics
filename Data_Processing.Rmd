@@ -68,27 +68,16 @@ Link price to customer + plot
 merge(orders,order_items, by="order_id") -> df1
 df1 <- merge(df1, customers, by="customer_id")
 df1 %>% 
-  filter(price < 5) -> df1
+  filter(price > 0 ) -> df1
 
 ggplot(df1, aes(x=customer_id, y=price)) + geom_point()
 ```
 Analysis: 
 
-Since most of the data is under 2000 approx. Lets filter those points out.
-```{r}
-df_cust_price = temp
-
-df_cust_price %>% 
-  filter(`order_items$price` < 5) -> df_cust_price_new
-
-df_cust_price_new
-  
-qplot(df_cust_price_new, aes(df_cust_price_new$customers.customer_unique_id, df_cust_price_new$`order_items$price`))
-```
-
-
 Curious if we group the customers by zipcode.
 ```{r}
+group_by_zip <- df1
+View(group_by_zip)
 temp %>%
   mutate(customers$customer_zip_code_prefix) %>%
   group_by(customers$customer_zip_code_prefix) -> temp
