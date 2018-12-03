@@ -1,0 +1,3 @@
+Most frequent customers by:
+state - São Paulo(SP) with 41,746
+city - Sao Paulo with 15,540

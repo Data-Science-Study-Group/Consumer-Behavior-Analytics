@@ -1,0 +1,5 @@
+orders can be purchased and approved on weekends.
+orders can be shipped and delivered on Saturdays but not Sundays.
+
+They didn't seem to start shipping/delivering on Saturdays until July 2017. 
+Estimated delivery date seems to be way later than actual delivery date.
