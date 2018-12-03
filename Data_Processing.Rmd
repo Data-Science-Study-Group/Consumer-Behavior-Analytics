@@ -9,15 +9,15 @@ output: html_document
 library(tidyverse)
 library(ggplot2)
 library(date)
-customers = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_customers_dataset.xls")
-geolocation = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_geolocation_dataset.xls")
-order_items = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_order_items_dataset.xls")
-order_payments = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_order_payments_dataset.xls")
-order_reviews = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_order_reviews_dataset.xls")
-orders = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_orders_dataset.xls")
-products = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_products_dataset.xls")
-sellers = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_sellers_dataset.xls")
-product_category = readxl::read_xls(path = "~/GitHub/datasci_proj/brazilian-ecommerce_ver6/product_category_name_translation.xls")
+customers = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_customers_dataset.csv")
+geolocation = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_geolocation_dataset.csv")
+order_items = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_order_items_dataset.csv")
+order_payments = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_order_payments_dataset.csv")
+order_reviews = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_order_reviews_dataset.csv")
+orders = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_orders_dataset.csv")
+products = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_products_dataset.csv")
+sellers = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_sellers_dataset.csv")
+product_category = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/product_category_name_translation.csv")
 ```
 
 #Description of the attributes of each dataset
@@ -66,8 +66,8 @@ We see that there is an outlier at the max of 6735. Maybe we should exclude this
 Prep the dataframe, temp, to plot.
 ```{r}
 temp = data.frame(customers$customer_unique_id)
-temp%>%mutate(customers$customer_id)->temp
-temp%>%mutate(order_items$price) -> temp
+temp%>%mutate(customers$customer_id) -> temp
+temp%>%mutate(orders$)
 temp%>%arrange(customers.customer_unique_id)
 temp%>%arrange(customers$customer_id)
 
@@ -173,6 +173,34 @@ df_debitcard$city = row.names(df_debitcard)
 
 ?`stringr-package`
 ```
+#Split into quarters
+```{r}
+orders_Q1 <- orders #set Q1 with orders
+#split orders purchased into distinct columns
+orders_Q1$order_purchase_timestamp %>%
+  str_split_fixed(pattern = " ", 2) -> temp
+
+#keep only dates
+temp[,1] -> temp
+
+#push back onto Q1
+mutate(orders_Q1, temp) -> orders_Q1
+View(orders_Q1)
+class(orders_Q1$temp)#is character type, must be date type
+
+orders_Q1$temp <- as.Date(orders_Q1$temp, format= "%Y-%m-%d")
+#sort out only Q1 of 2017
+subset(orders_Q1, temp > "2014-01-01" & temp < "2017-01-01") -> 
+
+summary(orders_Q1)
+```
+```{r}
+summary(orders)
+```
+
+
+
+#Split into training and test set
 
 Machine Learning
 need to find the shipping speed of dates.
@@ -181,7 +209,14 @@ orders -> df
 
 ?date
 ```
+#Link price to customer + plot
+```{r}
+merge(orders,order_items, by="order_id") -> df1
+df1 <- merge(df1, customers, by="customer_id")
+df1
 
+ggplot(df1, aes(x=customer_id, y=price)) + geom_point()
+```
 
 
 
