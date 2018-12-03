@@ -74,32 +74,30 @@ ggplot(df1, aes(x=customer_id, y=price)) + geom_point() + geom_smooth()
 ```
 Analysis: Looking at the plot we see that the majority of the purchases were under $2000, a few points are greater than $6k which we might want to exclude.
 
+#How have orders progressed over time?
+Let's find out with payments dataset for y val, and x = order_purchase_timestamp.
+```{r}
+df = data.frame(order_payments$payment_value,orders$order_purchase_timestamp)
+df <- df1
+qplot(x=df$order_purchase_timestamp,y=df$price,data=df, color="red")
+```
+Analysis: 
+
 Group by top 5 cities
 ```{r}
 group_by_city_df <- df1
-View(group_by_city_df)
-names(group_by_city_df)
 
 group_by_city_df %>%
 group_by(customer_city) -> df_group_by_city
 
 df_group_by_city %>% 
-  arrange($) %>%
     select(customer_city_code_prefix,everything()) -> customer_city_price_plot
-
+customer_city_price_plot
 #fix
 #ggplot(customer_zip_price_plot, aes(x=customer_zip_price_plot$customer_id,y=customer_zip_price_plot$price, ))
 
 qplot(x=temp$customers.customer_unique_id,y=temp$`order_items$price`,data=temp, color=temp$`customers$customer_zip_code_prefix`) + geom_point() + coord_fixed(2)
 ```
-How have orders progressed over time?
-Let's find out with payments dataset for y val, and x = order_purchase_timestamp.
-```{r}
-df = data.frame(order_payments$payment_value,orders$order_purchase_timestamp)
-
-qplot(x=df$orders.order_purchase_timestamp,y=df$order_payments.payment_value,data=df, color="red")
-```
-We see that we have a gap in the data before jan 2017. 
 
 Curious of the frequency of buyers from various zip codes.
 ```{r}
@@ -251,8 +249,6 @@ dates
 total_diff_min
 
 ```
-
-This is pretend code!
 
 #TOP 5 STATES
 ```{r}
