@@ -68,24 +68,27 @@ Link price to customer + plot
 merge(orders,order_items, by="order_id") -> df1
 df1 <- merge(df1, customers, by="customer_id")
 df1 %>% 
-  filter(price > 0 ) -> df1
+  filter(price < 10 ) -> df1
 
-ggplot(df1, aes(x=customer_id, y=price)) + geom_point()
+ggplot(df1, aes(x=customer_id, y=price)) + geom_point() + geom_smooth()
 ```
-Analysis: Looking at the plot we see that the majority of the purchases were under $2000
+Analysis: Looking at the plot we see that the majority of the purchases were under $2000, a few points are greater than $6k which we might want to exclude.
 
-Curious if we group the customers by zipcode.
+Group by top 5 cities
 ```{r}
-group_by_zip <- df1
-View(group_by_zip)
-temp %>%
-  mutate(customers$customer_zip_code_prefix) %>%
-  group_by(customers$customer_zip_code_prefix) -> temp
+group_by_city_df <- df1
+View(group_by_city_df)
+names(group_by_city_df)
 
-temp %>% arrange(`customers$customer_zip_code_prefix`) %>%
-    select(`customers$customer_zip_code_prefix`,everything())
+group_by_city_df %>%
+group_by(customer_city) -> df_group_by_city
 
-ggplot(temp, aes(x=temp$customers.customer_unique_id,y=temp$`order_items$price`))
+df_group_by_city %>% 
+  arrange($) %>%
+    select(customer_city_code_prefix,everything()) -> customer_city_price_plot
+
+#fix
+#ggplot(customer_zip_price_plot, aes(x=customer_zip_price_plot$customer_id,y=customer_zip_price_plot$price, ))
 
 qplot(x=temp$customers.customer_unique_id,y=temp$`order_items$price`,data=temp, color=temp$`customers$customer_zip_code_prefix`) + geom_point() + coord_fixed(2)
 ```
@@ -279,4 +282,4 @@ ggplot(data=plot_state_freq,aes(x=reorder(State,-Frequency),y=Frequency)) + geom
 
 ```
 
-Carlos - testing 12/2/18
+carlos test
