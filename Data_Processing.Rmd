@@ -72,7 +72,7 @@ df1 %>%
 
 ggplot(df1, aes(x=customer_id, y=price)) + geom_point()
 ```
-Analysis: 
+Analysis: Looking at the plot we see that the majority of the purchases were under $2000
 
 Curious if we group the customers by zipcode.
 ```{r}
