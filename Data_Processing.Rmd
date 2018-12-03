@@ -198,8 +198,8 @@ library(tidyverse)
 library(stringr)
 
 #load data
-data = orders
-#data = read.csv("~/GitHub/datasci_proj/delivery_speed/olist_orders_dataset.csv")
+#data = orders
+data = read.csv("~/GitHub/datasci_proj/delivery_speed/olist_orders_dataset.csv")
 
 #get the two columns we need
 dates = data[,c(4,6)]
