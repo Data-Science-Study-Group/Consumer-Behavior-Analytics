@@ -54,5 +54,10 @@ subset(df, df$`df.time[, 1]` > "2018-10-01" & df$`df.time[, 1]` < "2018-12-31") 
 
 
 #plots
-ggplot(data = df_q1_2017,aes(x = df_q1_2017$order_purchase_timestamp, y = df_q1_2017$price)) + geom_point(color='blue') + geom_smooth(method = "lm", se = FALSE)
+ggplot(data = df_q1_2017,aes(x = as.numeric(df_q1_2017$order_purchase_timestamp), y = df_q1_2017$price)) + geom_point(color='blue') + geom_smooth(method = "lm", se = FALSE)
 lm(data = df_q1_2017, price ~ order_purchase_timestamp)
+
+"""
+ggplot(df_q1_2017,aes(x = as.numeric(df_q1_2017$order_purchase_timestamp), y = df_q1_2017$price)) + geom_point() + geom_smooth()
+class(df_q1_2017$order_purchase_timestamp)
+class(df_q1_2017$price)"""
