@@ -1,3 +1,5 @@
+library(ggplot2)
+
 orders = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_orders_dataset.csv",na.strings = c("","NA"))
 customers = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_customers_dataset.csv")
 order_items = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_order_items_dataset.csv")
@@ -49,3 +51,8 @@ subset(df, df$`df.time[, 1]` > "2018-04-01" & df$`df.time[, 1]` < "2018-6-30") -
 subset(df, df$`df.time[, 1]` > "2018-07-01" & df$`df.time[, 1]` < "2018-09-30") -> df_q3_2018
 
 subset(df, df$`df.time[, 1]` > "2018-10-01" & df$`df.time[, 1]` < "2018-12-31") -> df_q4_2018
+
+
+#plots
+ggplot(data = df_q1_2017,aes(x = df_q1_2017$order_purchase_timestamp, y = df_q1_2017$price)) + geom_point(color='blue') + geom_smooth(method = "lm", se = FALSE)
+lm(data = df_q1_2017, price ~ order_purchase_timestamp)
