@@ -77,4 +77,16 @@ temp$day_difference = round(difftime(d1,d2, units = "days") * -1,digit = 0)
 t1 = strptime(temp[,6], format = "%H:%M")
 t2 = strptime(temp[,8], format = "%H:%M")
 temp$time_difference_min = difftime(t2,t1, units = "min") #as.numeric
-temp$time_difference_min = lapply(temp[,8], function(x)(if(is.na(x) != TRUE && x < 0){x * -1} else{x})) #turn all values positive
+temp$time_difference_min = lapply(temp[,10], function(x)(if(is.na(x) != TRUE && x < 0){x * -1} else{x})) #turn all values positive
+
+#get total minutes
+temp$total_min = as.numeric(temp$time_difference_min) + (temp$day_difference * 1440) #24 * 60 = 1440 minutes in a day
+
+non_seq = temp[temp$payment_sequential == 1,]
+seq = temp[temp$payment_sequential > 1,]
+
+#get rid of na values
+non_seq$total_min = lapply(non_seq$total_min, function(x){if(is.na(x) == TRUE){0} else{x}})
+seq$total_min = lapply(seq$total_min, function(x){if(is.na(x) == TRUE){0} else{x}})
+mean(as.numeric(non_seq$total_min))
+mean(as.numeric(seq$total_min))
