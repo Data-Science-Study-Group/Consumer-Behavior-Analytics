@@ -33,6 +33,10 @@ pie(as.numeric(total_by_category[1:5,2]),labels = piepercent,main = "Top 5 bough
 
 #Bar chart top 5
 library(ggplot2)
-ggplot(data = total_by_category[1:5,], aes(x = product_category, y = total,fill = product_category)) + geom_bar(stat = "identity", width = .5) #+ theme(axis.title.x = element_text(margin = unit(c(6, 0, 0, 0), "mm")))
-
+ggplot(data = total_by_category[1:5,], 
+       aes(x = product_category, y = total,fill = product_category)) + 
+        geom_bar(stat="identity") + 
+          theme(axis.title.x = element_text(),
+                axis.text.x = element_blank(),
+                axis.ticks.x = element_blank())
        
