@@ -3,9 +3,15 @@ library(ggplot2)
 orders = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_orders_dataset.csv",na.strings = c("","NA"))
 customers = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_customers_dataset.csv")
 order_items = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_order_items_dataset.csv")
+product_category = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_products_dataset.csv")
+product_trans = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/product_category_name_translation.csv")
 
 merge(orders,order_items, by="order_id") -> df
 df<- merge(df, customers, by="customer_id")
+
+merge(df, product_category, by="product_id") -> df
+merge(df, product_trans, by="product_category_name") -> df
+View(df)
 
 #Split into quarters
 
@@ -52,7 +58,72 @@ subset(df, df$`df.time[, 1]` > "2018-07-01" & df$`df.time[, 1]` < "2018-09-30") 
 
 subset(df, df$`df.time[, 1]` > "2018-10-01" & df$`df.time[, 1]` < "2018-12-31") -> df_q4_2018
 
-
+#%s/df_q1_2017/df_q1_2017_h_and_b/gc
 #plots
-ggplot(data = df_q1_2017,aes(x = df_q1_2017$order_purchase_timestamp, y = df_q1_2017$price)) + geom_point(color='blue') + geom_smooth(method = "lm", se = FALSE)
-lm(data = df_q1_2017, price ~ order_purchase_timestamp)
+df_q1_2017 %>%
+  filter(df_q1_2017$product_category_name_english %in% "health_beauty") -> df_q1_2017_h_and_b
+
+ggplot(data = df_q1_2017_h_and_b,
+       aes(x = as.numeric(df_q1_2017_h_and_b$order_purchase_timestamp),
+           y = df_q1_2017_h_and_b$price)) +
+  geom_point(color='red') +
+  geom_smooth(method = 'glm') +
+  ggtitle("Regression of Q1-2017 Health and Beauty") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x="Purchased",y="Price")
+
+reggresor <- lm(data = df_q1_2017_h_and_b, (price) ~ as.numeric(order_purchase_timestamp))
+summary(reggresor)
+#
+
+#df_q2_2017_h_and_b
+df_q2_2017 %>%
+  filter(df_q2_2017$product_category_name_english %in% "health_beauty") -> df_q2_2017_h_and_b
+
+ggplot(data = df_q2_2017_h_and_b,
+       aes(x = as.numeric(df_q2_2017_h_and_b$order_purchase_timestamp),
+           y = df_q2_2017_h_and_b$price)) +
+  geom_point(color='red') +
+  geom_smooth(method = 'glm') +
+  ggtitle("Regression of Q2-2017 Health and Beauty") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x="Purchased",y="Price")
+
+reggresor <- lm(data = df_q2_2017_h_and_b, (price) ~ as.numeric(order_purchase_timestamp))
+summary(reggresor)
+#
+
+#df_q3_2017_h_and_b
+df_q3_2017 %>%
+  filter(df_q3_2017$product_category_name_english %in% "health_beauty") -> df_q3_2017_h_and_b
+
+ggplot(data = df_q3_2017_h_and_b,
+       aes(x = as.numeric(df_q3_2017_h_and_b$order_purchase_timestamp),
+           y = df_q3_2017_h_and_b$price)) +
+  geom_point(color='red') +
+  geom_smooth(method = 'glm') +
+  ggtitle("Regression of Q3-2017 Health and Beauty") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x="Purchased",y="Price")
+
+reggresor <- lm(data = df_q3_2017_h_and_b, (price) ~ as.numeric(order_purchase_timestamp))
+summary(reggresor)
+#
+
+#df_q4_2017_h_and_b
+df_q4_2017 %>%
+  filter(df_q4_2017$product_category_name_english %in% "health_beauty") -> df_q4_2017_h_and_b
+
+ggplot(data = df_q4_2017_h_and_b,
+       aes(x = as.numeric(df_q4_2017_h_and_b$order_purchase_timestamp),
+           y = df_q4_2017_h_and_b$price)) +
+  geom_point(color='red') +
+  geom_smooth(method = 'glm') +
+  ggtitle("Regression of Q4-2017 Health and Beauty") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x="Purchased",y="Price")
+
+reggresor <- lm(data = df_q4_2017_h_and_b, (price) ~ as.numeric(order_purchase_timestamp))
+summary(reggresor)
+#
+
