@@ -39,5 +39,5 @@ ggplot(data = total_by_category[1:5,],
           theme(axis.title.x = element_text(),
                 axis.text.x = element_blank(),
                 axis.ticks.x = element_blank()) +
-                  labs(x = "Product Category", y="Frequency")
+                  labs(x = "Product Category", y="Frequency(Brazilian Real)")
                 
