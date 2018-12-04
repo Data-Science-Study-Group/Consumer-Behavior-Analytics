@@ -82,11 +82,15 @@ temp$time_difference_min = lapply(temp[,10], function(x)(if(is.na(x) != TRUE && 
 #get total minutes
 temp$total_min = as.numeric(temp$time_difference_min) + (temp$day_difference * 1440) #24 * 60 = 1440 minutes in a day
 
-non_seq = temp[temp$payment_sequential == 1,]
-seq = temp[temp$payment_sequential > 1,]
+#temp$is_seq = temp[temp$payment_sequential == 1,]
+#temp$is_seq = temp[temp$payment_sequential > 1,]
+
+temp$is_seq = lapply(temp$payment_sequential, function(x){if(x == 1){1} else{0}})
 
 #get rid of na values
 non_seq$total_min = lapply(non_seq$total_min, function(x){if(is.na(x) == TRUE){0} else{x}})
 seq$total_min = lapply(seq$total_min, function(x){if(is.na(x) == TRUE){0} else{x}})
 mean(as.numeric(non_seq$total_min))
 mean(as.numeric(seq$total_min))
+
+qplot(data = temp,x=temp$payment_sequential) + geom_bar()
