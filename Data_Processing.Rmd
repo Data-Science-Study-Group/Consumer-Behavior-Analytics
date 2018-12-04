@@ -52,6 +52,7 @@ sellers %>% names()
 ```
 
 
+
 #Exploratory Data Analysis Stage
 ```{r}
 order_items$price %>%
@@ -63,21 +64,22 @@ order_items %>% arrange(desc(price)) %>%
 We see that there is an outlier at the max of 6735. Maybe we should exclude this point?
 
 #What the correlation between customer and price?
-Link price to customer + plot
 ```{r}
 merge(orders,order_items, by="order_id") -> df1
 df1 <- merge(df1, customers, by="customer_id")
-df1 %>% 
-  filter(price < 10 ) -> df1
+```
 
-ggplot(df1, aes(x=customer_id, y=price)) + geom_point() + geom_smooth()
+Link price to customer + plot
+```{r}
+df1 %>% 
+  filter(price < 7000 ) -> df2
+ggplot(df2, aes(x=customer_id, y=price)) + geom_point() + geom_smooth()
 ```
 Analysis: Looking at the plot we see that the majority of the purchases were under $2000, a few points are greater than $6k which we might want to exclude.
 
 #How have orders progressed over time?
 Let's find out with payments dataset for y val, and x = order_purchase_timestamp.
 ```{r}
-df = data.frame(order_payments$payment_value,orders$order_purchase_timestamp)
 df <- df1
 qplot(x=df$order_purchase_timestamp,y=df$price,data=df, color="red")
 ```
@@ -85,19 +87,78 @@ Analysis:
 
 Group by top 5 cities
 ```{r}
+#copy over dataframe
 group_by_city_df <- df1
 
+#group by city
 group_by_city_df %>%
-group_by(customer_city) -> df_group_by_city
+group_by(customer_city) -> group_by_city_df
 
-df_group_by_city %>% 
-    select(customer_city_code_prefix,everything()) -> customer_city_price_plot
-customer_city_price_plot
-#fix
-#ggplot(customer_zip_price_plot, aes(x=customer_zip_price_plot$customer_id,y=customer_zip_price_plot$price, ))
+#remap df to have city at front
+group_by_city_df %>% 
+    select(customer_city,everything()) -> group_by_city_df
 
-qplot(x=temp$customers.customer_unique_id,y=temp$`order_items$price`,data=temp, color=temp$`customers$customer_zip_code_prefix`) + geom_point() + coord_fixed(2)
+#find the frequency of orders from each city
+table(group_by_city_df$customer_city) %>%
+  as.data.frame() %>%
+  arrange(desc(Freq)) -> tb_city
+
+#only show top 5 cities with most frequent orders
+tb_city[1:5,] -> tb_city
+
+#see top 5 cities as a plot
+ggplot(data=tb_city, aes(x=order(Var1),y=Freq,color=Var1)) + geom_col()
 ```
+#What does each city look like with their customers?
+```{r}
+#set
+cust_city_5 <- df1
+
+#top 5
+target <- c("belo horizonte", "brasilia", "curitiba","rio de janeiro","sao paulo")
+
+#filter known top 5 cities
+cust_city_5 %>%
+  filter(customer_city %in% target) -> cust_city_5
+
+cust_city_5
+
+ggplot(cust_city_5,aes(x=cust_city_5$customer_id,y=cust_city_5$price,color=customer_city)) + facet_grid(cols=vars(customer_city)) + geom_point()
+```
+
+```{r}
+just_top <- cust_city_5
+
+just_top %>%
+  filter(customer_city %in% c("sao paulo")) -> just_top
+just_top
+
+regressor <- lm(just_top$price ~ just_top$customer_id)
+```
+```{r}
+bott_city <- cust_city_5
+
+bott_city %>%
+  filter(customer_city %in% c("curitiba")) -> bott_city
+bott_city %>%
+  filter(price < 200) -> bott_city
+
+qplot(data=bott_city,x=bott_city$order_id,y=bott_city$price)
+
+test = bott_city
+
+ggplot(data=bott_city,aes(x=as.numeric(order_purchase_timestamp),y=price)) + 
+  geom_point()+
+  geom_smooth(method="gam")
+
+qplot(data=test,x=as.numeric(order_purchase_timestamp),y=price, geom = c("point","smooth"))
+      
+regressor <- lm(bott_city$price ~ bott_city$)
+summary(regressor)
+plot(regressor)
+```
+
+
 
 Curious of the frequency of buyers from various zip codes.
 ```{r}
@@ -146,8 +207,20 @@ df_debitcard$city = row.names(df_debitcard)
 
 ?`stringr-package`
 ```
+
 #Split into quarters
 ```{r}
+#create quarters
+df_q4_2016 <- data.frame(df1)
+df_q1_2017 <- data.frame(df1)
+df_q2_2017<- df1
+df_q3_2017<- df1
+df_q4_2017<- df1
+df_q1_2018<- df1
+df_q2_2018<- df1
+df_q3_2018<- df1
+
+
 orders_Q1 <- orders #set Q1 with orders
 #split orders purchased into distinct columns
 orders_Q1$order_purchase_timestamp %>%
