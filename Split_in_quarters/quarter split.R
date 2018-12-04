@@ -83,6 +83,15 @@ subset(df, df$`df.time[, 1]` > "2018-10-01" & df$`df.time[, 1]` < "2018-12-31") 
 
 #%s/df_q1_2017/df_q1_2017_h_and_b/gc
 #plots
+<<<<<<< HEAD
+ggplot(data = df_q1_2017,aes(x = as.numeric(df_q1_2017$order_purchase_timestamp), y = df_q1_2017$price)) + geom_point(color='blue') + geom_smooth(method = "lm", se = FALSE)
+lm(data = df_q1_2017, price ~ order_purchase_timestamp)
+
+"""
+ggplot(df_q1_2017,aes(x = as.numeric(df_q1_2017$order_purchase_timestamp), y = df_q1_2017$price)) + geom_point() + geom_smooth()
+class(df_q1_2017$order_purchase_timestamp)
+class(df_q1_2017$price)"""
+=======
 df_q1_2017 %>%
   filter(df_q1_2017$product_category_name_english %in% "health_beauty") -> df_q1_2017_h_and_b
 
@@ -150,3 +159,4 @@ reggresor <- lm(data = df_q4_2017_h_and_b, (price) ~ as.numeric(order_purchase_t
 summary(reggresor)
 #
 
+>>>>>>> bab0a4200e50e6288594fe28aa5ca4abad474bc0

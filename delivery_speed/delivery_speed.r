@@ -45,3 +45,36 @@ temp$total_min = temp$days_min + as.numeric(temp$min) #add all the minutes toget
 
 total_diff_min = temp[c(1,5)]
 
+
+#seq payments
+#order_items = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_order_items_dataset.csv")
+pay = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_order_payments_dataset.csv")
+orders = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_orders_dataset.csv",na.strings = c("","NA"))
+
+library(dplyr)
+merge(orders,pay,by="order_id") -> df
+
+temp = df[,c(4,6,9,10)]
+temp$parsed_purchased_date = 
+  lapply(temp[,1], function(x) (str_split_fixed(x," ",2)[1]))
+
+temp$parsed_purchased_time = 
+  lapply(temp[,1], function(x) (str_split_fixed(x," ",2)[2]))
+
+#same as above
+temp$pasred_deliver_carrier_date = 
+  lapply(temp[,2], function(x) (str_split_fixed(x," ",2)[1]))
+
+temp$pasred_deliver_carrier_time = 
+  lapply(temp[,2], function(x) (str_split_fixed(x," ",2)[2]))
+
+#calculate the difference in days
+d1 = strptime(temp[,5],format = "%Y-%m-%d")
+d2 = strptime(temp[,7],format = "%Y-%m-%d")
+temp$day_difference = round(difftime(d1,d2, units = "days") * -1,digit = 0)
+
+#difference in time
+t1 = strptime(temp[,6], format = "%H:%M")
+t2 = strptime(temp[,8], format = "%H:%M")
+temp$time_difference_min = difftime(t2,t1, units = "min") #as.numeric
+temp$time_difference_min = lapply(temp[,8], function(x)(if(is.na(x) != TRUE && x < 0){x * -1} else{x})) #turn all values positive

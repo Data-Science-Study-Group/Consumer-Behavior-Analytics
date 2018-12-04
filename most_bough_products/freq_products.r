@@ -10,6 +10,15 @@ freq_product$ID = seq.int(nrow(freq_product))#set an additional index column
 rownames(freq_product) = freq_product[,3]#change column 0 to index column
 freq_product$ID = NULL#erase index column
 
+#barchart for top 5 freq bought products
+library(ggplot2)
+ggplot(data = freq_product[1:5,], 
+       aes(x = Var1, y = Freq,fill = Var1)) + 
+  geom_bar(stat="identity") + 
+  theme(axis.title.x = element_text(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())
+
 
 
 #FINDING THE HOW MUCH CONSUMERS HAVE SPENT ON EACH CATEGORY
