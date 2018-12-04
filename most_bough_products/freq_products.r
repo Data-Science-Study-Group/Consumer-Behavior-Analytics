@@ -1,5 +1,5 @@
 #loading the data
-dataset = read.csv("C:/Users/Carlos/Desktop/Project/most_bough_products/dataset.csv")
+dataset = read.csv("~/GitHub/datasci_proj/most_bough_products/dataset.csv")
 
 #FINDING THE MOST BOUGHT PRODUCT
 products = table(dataset$product_category)
@@ -23,3 +23,16 @@ total_by_category = totals[with(totals,order(-total)),]
 total_by_category$ID <- seq.int(nrow(total_by_category)) #create index column
 rownames(total_by_category) = total_by_category[,3]#replace column 0 with index column
 total_by_category$ID <- NULL #erase our index column
+
+#PIE CHART of top 5
+total_by_category$total = round(total_by_category$total)
+numbers = as.numeric(total_by_category[1:5,2])
+labels = total_by_category[1:5,1] #get the labels of the top 5
+piepercent =  round(100*numbers/sum(numbers), 1)#to get the percentage on the pie chart
+pie(as.numeric(total_by_category[1:5,2]),labels = piepercent,main = "Top 5 bought categories")
+
+#Bar chart top 5
+library(ggplot2)
+ggplot(data = total_by_category[1:5,], aes(x = product_category, y = total,fill = product_category)) + geom_bar(stat = "identity", width = .5) #+ theme(axis.title.x = element_text(margin = unit(c(6, 0, 0, 0), "mm")))
+
+       
