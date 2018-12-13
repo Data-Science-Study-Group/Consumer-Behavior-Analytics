@@ -144,7 +144,7 @@ sao_paulo = dummy[dummy$city == "sao paulo",]
 city_spending[nrow(city_spending)+1,] = c(sum(sao_paulo$price),"sao paulo")
 
 library(ggplot2)
-ggplot(data = city_spending, 
+ggplot(data = city_spending,
        aes(x = city, y = total_spending,fill = city)) + 
   geom_bar(stat="identity") + 
   theme(axis.title.x = element_text(),

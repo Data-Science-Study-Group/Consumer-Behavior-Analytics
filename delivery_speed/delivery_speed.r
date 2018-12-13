@@ -87,12 +87,16 @@ temp$total_min = as.numeric(temp$time_difference_min) + (temp$day_difference * 1
 
 temp$is_seq = lapply(temp$payment_sequential, function(x){if(x == 1){1} else{0}})
 
+<<<<<<< HEAD
+"""
+=======
 
+>>>>>>> a6a5986991cdaa3361e2a2718be60d6f8b2e1989
 #get rid of na values
 non_seq$total_min = lapply(non_seq$total_min, function(x){if(is.na(x) == TRUE){0} else{x}})
 seq$total_min = lapply(seq$total_min, function(x){if(is.na(x) == TRUE){0} else{x}})
 mean(as.numeric(non_seq$total_min))
-mean(as.numeric(seq$total_min))
+mean(as.numeric(seq$total_min)) """
 
 temp %>% 
   filter(is_seq == 0) -> new
