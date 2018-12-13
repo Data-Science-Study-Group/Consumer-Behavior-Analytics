@@ -31,7 +31,6 @@ rownames(freq_cities) = freq_cities[,3]#replace column 0 with index column
 freq_cities$ID <- NULL #erase our index column
 
 
-
 #bar graph of top 5 cities
 freq_cities[1:5,] -> plot_city
 names(plot_city) = c("City","Frequency")

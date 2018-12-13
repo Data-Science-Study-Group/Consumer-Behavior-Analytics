@@ -10,6 +10,9 @@ freq_product$ID = seq.int(nrow(freq_product))#set an additional index column
 rownames(freq_product) = freq_product[,3]#change column 0 to index column
 freq_product$ID = NULL#erase index column
 
+
+View(products)
+
 #barchart for top 5 freq bought products
 library(ggplot2)
 ggplot(data = freq_product[1:5,], 
