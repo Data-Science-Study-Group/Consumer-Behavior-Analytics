@@ -358,3 +358,559 @@ ggplot(data=plot_state_freq,aes(x=reorder(State,-Frequency),y=Frequency)) + geom
 
 ```
 
+Frequent Products
+```{r}
+#loading the data
+dataset = read.csv("~/GitHub/datasci_proj/most_bough_products/dataset.csv")
+
+#FINDING THE MOST BOUGHT PRODUCT
+products = table(dataset$product_category)
+products = as.data.frame(products)
+freq_product = products[with(products,order(-Freq)),]
+
+freq_product$ID = seq.int(nrow(freq_product))#set an additional index column
+rownames(freq_product) = freq_product[,3]#change column 0 to index column
+freq_product$ID = NULL#erase index column
+
+
+View(products)
+
+#barchart for top 5 freq bought products
+library(ggplot2)
+ggplot(data = freq_product[1:5,], 
+       aes(x = Var1, y = Freq,fill = Var1)) + 
+  geom_bar(stat="identity") + 
+  theme(axis.title.x = element_text(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())
+
+
+
+#FINDING THE HOW MUCH CONSUMERS HAVE SPENT ON EACH CATEGORY
+#copy over the category and prices variables.
+values = dataset[,c(4,7)]
+colnames(values)[2] = "total" 
+totals = aggregate(total ~ product_category + total, data = values, sum)
+
+total_by_category = totals[with(totals,order(-total)),]
+
+total_by_category$ID <- seq.int(nrow(total_by_category)) #create index column
+rownames(total_by_category) = total_by_category[,3]#replace column 0 with index column
+total_by_category$ID <- NULL #erase our index column
+
+#PIE CHART of top 5
+total_by_category$total = round(total_by_category$total)
+numbers = as.numeric(total_by_category[1:5,2])
+labels = total_by_category[1:5,1] #get the labels of the top 5
+piepercent =  round(100*numbers/sum(numbers), 1)#to get the percentage on the pie chart
+pie(as.numeric(total_by_category[1:5,2]),labels = piepercent,main = "Top 5 bought categories")
+
+#Bar chart top 5
+library(ggplot2)
+ggplot(data = total_by_category[1:5,], 
+       aes(x = product_category, y = total,fill = product_category)) + 
+        geom_bar(stat="identity") + 
+          theme(axis.title.x = element_text(),
+                axis.text.x = element_blank(),
+                axis.ticks.x = element_blank()) +
+                  labs(x = "Product Category", y="Frequency(Brazilian Real)")
+                
+```
+
+Linear and Logistic Regression
+```{r}
+library(ggplot2)
+library(data.table)
+library(dplyr)
+library(date)
+library(base)
+library(stringr)
+orders = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_orders_dataset.csv",na.strings = c("","NA"))
+customers = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_customers_dataset.csv")
+order_items = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_order_items_dataset.csv")
+product_category = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_products_dataset.csv")
+product_trans = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/product_category_name_translation.csv")
+
+#merge
+df <- merge(orders,order_items, by="order_id")
+df <- merge(df, customers, by="customer_id")
+
+merge(df, product_category, by="product_id") -> df
+merge(df, product_trans, by="product_category_name") -> df
+#
+
+#split purchase by date and time
+df.time <- df$order_purchase_timestamp %>%
+  str_split_fixed(pattern = " ", n=2)
+
+#append table back onto df
+df <- df %>%
+  mutate(df.time[,1])
+df <- df %>%
+  mutate(df.time[,2])
+
+#set new names
+setnames(df,c("df.time[, 1]","df.time[, 2]"), c('Day_Pur','Time_Pur'))
+#
+
+#create frequency table of num of items bought in a day
+new_new <- table(df$Day_Pur) %>%
+  as.data.frame()
+
+#filter top by cat
+new_cat <- table(df$product_category_name_english) %>%
+  as.data.frame()
+new_cat <- new_cat %>%
+  arrange(-Freq)
+new_cat = new_cat[1:5,]
+#
+#rename col
+names(new_cat) = c("product_category_name_english","Freq_Prod")
+#
+
+#merge back
+df <- left_join(x=df,y=new_cat,by="product_category_name_english")
+#
+
+#filter out na
+df <- df %>%
+  filter(!is.na(Freq_Prod))
+#
+
+#filter out categories == 0
+df_temp <- subset(x = df, df$Freq_Prod != 0)
+
+#rename new_new
+#
+names(new_new) = c("Day_Pur","Freq")
+#
+
+#convert to date type
+df$Day_Pur <- as.Date(df$Day_Pur, format= "%Y-%m-%d")
+new_new$Day_Pur <- as.Date(new_new$Day_Pur, format = "%Y-%m-%d")
+
+View(new_new)
+View(df)
+#
+
+#keep only top 5
+#new_new <- new_new %>%
+#  arrange(-Freq)
+#new_new <- new_new[1:5,]
+#
+
+##join
+left_join(x=df,y=new_new,by="Day_Pur") -> df
+View(df)
+##
+
+#remove rows with NA
+#df <- df %>% 
+ # filter(!is.na(Freq))
+#
+
+#add quarter column
+
+##
+
+##filter only top 5 categories
+
+#
+
+plot(df$Day_Pur,df$Freq)
+boxplot(x = df$Day_Pur)
+
+
+#plotting new_new for a freq table instead of regression to price
+qplot(data=df,x=as.numeric(Day_Pur),y=Freq,color=df$product_category_name) + facet_grid(rows = vars(df$product_category_name_english)) + 
+  geom_point() +
+  geom_smooth(method = "glm",color="red")+
+  ggtitle("Day Purchased to Frequency of Items")+
+  labs(x="Purchased Date",y="Number of Products Bought")
+
+reg <- lm(data=df, Freq ~ as.numeric(Day_Pur))
+summary(reg)
+plot(reg)
+##
+
+#sort out only 2016
+df_q1_2016 <- subset(df, df$Day_Pur  > "2016-01-01" & df$Day_Pur < "2016-03-31")
+
+df_q2_2016 <- subset(df, df$Day_Pur > "2016-04-01" & df$Day_Pur < "2016-6-30")
+
+df_q3_2016 <- subset(df, df$Day_Pur > "2016-07-01" & df$Day_Pur < "2016-09-30")
+
+df_q4_2016 <- subset(df, df$Day_Pur > "2016-10-01" & df$Day_Pur < "2016-12-31")
+
+#2017
+df_q1_2017 <- subset(df, df$Day_Pur  > "2017-01-01" & df$Day_Pur < "2017-03-31")
+df_q1_2017$group = "q1_2017"
+
+df_q2_2017 <- subset(df, df$Day_Pur > "2017-04-01" & df$Day_Pur < "2017-6-30")
+df_q2_2017$group = "q2_2017"
+
+subset(df, df$Day_Pur > "2017-07-01" & df$Day_Pur < "2017-09-30") -> df_q3_2017
+df_q3_2017$group = "q3_2017"
+
+subset(df, df$Day_Pur > "2017-10-01" & df$Day_Pur < "2017-12-31") -> df_q4_2017
+df_q4_2017$group = "q4_2017"
+
+#2018
+subset(df, df$Day_Pur  > "2018-01-01" & df$Day_Pur < "2018-03-31") -> df_q1_2018
+
+subset(df, df$Day_Pur > "2018-04-01" & df$Day_Pur < "2018-6-30") -> df_q2_2018
+
+subset(df, df$Day_Pur > "2018-07-01" & df$Day_Pur < "2018-09-30") -> df_q3_2018
+
+subset(df, df$Day_Pur > "2018-10-01" & df$Day_Pur < "2018-12-31") -> df_q4_2018
+
+#end sub set
+
+#main_df plot of 2017
+rbind(df_q1_2017,df_q2_2017) -> main_df
+rbind(main_df,df_q3_2017) -> main_df
+rbind(main_df,df_q4_2017) -> main_df
+##
+
+#fitler by category
+main_df %>%
+  filter(main_df$product_category_name_english %in% "health_beauty") -> main_df_h_and_b
+
+main_df %>%
+  filter(main_df$product_category_name_english %in% "computers_accessories") -> main_df_comp_ass
+
+main_df %>%
+  filter(main_df$product_category_name_english %in% "sports_leisure") -> main_df_sport_lei
+##
+
+#plot by category
+
+#test
+x = as.numeric(main_df_h_and_b$order_purchase_timestamp)
+y=log(main_df_h_and_b$price)
+
+plot(x,y)
+
+ggplot(data = main_df_h_and_b,
+       aes(x = as.numeric(order_purchase_timestamp), y = price)) +
+         geom_point(aes(color=group)) +
+         geom_smooth(method = 'glm', aes(color=group),fill="black") +
+         ggtitle("Regression of 2017 Health and Beauty") +
+         theme(plot.title = element_text(hjust = 0.5)) +
+         labs(x="Purchased",y="Price")
+#test
+
+#health and beauty
+ggplot(data = main_df_h_and_b,
+       aes(x = as.numeric(order_purchase_timestamp),
+           y = (price) ) ) +
+  geom_point(aes(color=group)) +
+  geom_smooth(method = 'glm', aes(color=group),fill="black") +
+  ggtitle("Regression of 2017 Health and Beauty") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x="Purchased",y="Price")
+
+#reg
+reggresor <- lm(data = main_df_h_and_b, (price) ~ as.numeric(order_purchase_timestamp))
+summary(reggresor)
+plot(reggresor)
+##
+
+#
+
+#computer accessories
+ggplot(data = main_df_comp_ass,
+       aes(x = as.numeric(order_purchase_timestamp),
+           y = (price) ) ) +
+  geom_point(aes(color=group)) +
+  geom_smooth(method = 'glm', aes(color=group),fill="black") +
+  ggtitle("Regression of 2017 Computer Accessories") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x="Purchased",y="Price")
+#reg
+reggresor <- lm(data = main_df_comp_ass, (price) ~ as.numeric(order_purchase_timestamp))
+summary(reggresor)
+plot(reggresor)
+##
+
+##
+
+#sports_leisure
+ggplot(data = main_df_sport_lei,
+       aes(x = as.numeric(order_purchase_timestamp),
+           y = log(price) ) ) +
+  geom_point(aes(color=group)) +
+  geom_smooth(method = 'glm', aes(color=group),fill="black") +
+  ggtitle("Regression of 2017 Sports Leisure") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x="Purchased",y="Price")
+#reg
+reggresor <- lm(data = main_df_sport_lei, log(price) ~ as.numeric(order_purchase_timestamp))
+summary(reggresor)
+plot(reggresor)
+##
+
+##
+```
+
+#Frequent Customers
+```{r}
+library(tidyverse)
+library(dplyr)
+
+#load dataset
+data = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_customers_dataset.csv")
+orders = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_order_items_dataset.csv")
+
+#find out most freq customers by state
+state = table(data$customer_state)
+state = as.data.frame(state)
+freq_state = state[with(state,order(-Freq)),]
+
+freq_state$ID <- seq.int(nrow(freq_state)) #create index column
+rownames(freq_state) = freq_state[,3]#replace column 0 with index column
+freq_state$ID <- NULL #erase our index column
+
+#only plot the top 5
+freq_state[1:5,] -> plot_state_freq
+names(plot_state_freq) = c("State", "Frequency")
+ggplot(data=plot_state_freq,aes(x=State,y=Frequency)) + geom_bar(stat="identity")
+plot_state_freq %>% arrange(Frequency) -> plot_state_freq
+ggplot(data=plot_state_freq,aes(x=reorder(State,-Frequency),y=Frequency)) + geom_col() + ggtitle("Most Frequent Purchases by State")
+  
+#find out freq customers by city
+cities = table(data$customer_city)
+cities = as.data.frame(cities)
+freq_cities = cities[with(cities,order(-Freq)),]
+
+freq_cities$ID <- seq.int(nrow(freq_cities)) #create index column
+rownames(freq_cities) = freq_cities[,3]#replace column 0 with index column
+freq_cities$ID <- NULL #erase our index column
+
+
+#bar graph of top 5 cities
+freq_cities[1:5,] -> plot_city
+names(plot_city) = c("City","Frequency")
+ggplot(plot_city,aes(x=reorder(City,-Frequency),y=Frequency)) + geom_col() + ggtitle("Most Frequent Purchases by City")
+
+#Regression of state sales
+df_state_sales <- data.frame(data$customer_state, orders$price)
+df_state_sales
+
+```
+#Frequent Products
+```{r}
+#loading the data
+dataset = read.csv("~/GitHub/datasci_proj/most_bough_products/dataset.csv")
+
+#FINDING THE MOST BOUGHT PRODUCT
+products = table(dataset$product_category)
+products = as.data.frame(products)
+freq_product = products[with(products,order(-Freq)),]
+
+freq_product$ID = seq.int(nrow(freq_product))#set an additional index column
+rownames(freq_product) = freq_product[,3]#change column 0 to index column
+freq_product$ID = NULL#erase index column
+
+
+View(products)
+
+#barchart for top 5 freq bought products
+library(ggplot2)
+ggplot(data = freq_product[1:5,], 
+       aes(x = Var1, y = Freq,fill = Var1)) + 
+  geom_bar(stat="identity") + 
+  theme(axis.title.x = element_text(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())
+
+
+
+#FINDING THE HOW MUCH CONSUMERS HAVE SPENT ON EACH CATEGORY
+#copy over the category and prices variables.
+values = dataset[,c(4,7)]
+colnames(values)[2] = "total" 
+totals = aggregate(total ~ product_category + total, data = values, sum)
+
+total_by_category = totals[with(totals,order(-total)),]
+
+total_by_category$ID <- seq.int(nrow(total_by_category)) #create index column
+rownames(total_by_category) = total_by_category[,3]#replace column 0 with index column
+total_by_category$ID <- NULL #erase our index column
+
+#PIE CHART of top 5
+total_by_category$total = round(total_by_category$total)
+numbers = as.numeric(total_by_category[1:5,2])
+labels = total_by_category[1:5,1] #get the labels of the top 5
+piepercent =  round(100*numbers/sum(numbers), 1)#to get the percentage on the pie chart
+pie(as.numeric(total_by_category[1:5,2]),labels = piepercent,main = "Top 5 bought categories")
+
+#Bar chart top 5
+library(ggplot2)
+ggplot(data = total_by_category[1:5,], 
+       aes(x = product_category, y = total,fill = product_category)) + 
+        geom_bar(stat="identity") + 
+          theme(axis.title.x = element_text(),
+                axis.text.x = element_blank(),
+                axis.ticks.x = element_blank()) +
+                  labs(x = "Product Category", y="Frequency(Brazilian Real)")
+                
+```
+#Products by Area
+```{r}
+library(dplyr)
+
+#loading the data
+dataset = read.csv("~/GitHub/datasci_proj/most_bough_products/product_by_area.csv")
+
+#select only rows if it has one of the top 5 states
+top_states = c("SP","RJ","MG","RS","PR")
+dummy = dataset[dataset$state == top_states,]
+
+table(dummy$product_category)
+
+#GET MOST BOUGHT CATEGORY FOR EACH STATE
+
+#SP
+sp = dummy[dummy$state == "SP",]
+sp = table(sp$product_category) %>% as.data.frame() %>% arrange(desc(Freq))
+sp$state = "SP" #add an extra state column
+
+#RJ
+rj = dummy[dummy$state == "RJ",]
+rj = table(rj$product_category) %>% as.data.frame() %>% arrange(desc(Freq))
+rj$state = "RJ"
+
+#MG
+mg = dummy[dummy$state == "MG",]
+mg = table(mg$product_category) %>% as.data.frame() %>% arrange(desc(Freq))
+mg$state = "MG"
+
+#RS
+rs = dummy[dummy$state == "RS",]
+rs = table(rs$product_category) %>% as.data.frame() %>% arrange(desc(Freq))
+rs$state = "RS"
+
+#PR
+pr = dummy[dummy$state == "PR",]
+pr = table(pr$product_category) %>% as.data.frame() %>% arrange(desc(Freq))
+pr$state = "PR"
+
+#combine the top category for each state
+top_category_state = sp[1,]
+top_category_state = rbind(top_category_state,rj[1,])
+top_category_state = rbind(top_category_state,mg[1,])
+top_category_state = rbind(top_category_state,rs[1,])
+top_category_state = rbind(top_category_state,pr[1,])
+
+
+#GET MOST BOUGHT CATEGORY FOR EACH CITY
+top_cities = c("belo horizonte","brasilia","curitiba","rio de janeiro","sao paulo")
+dummy = dataset[dataset$city == top_cities,]
+
+#belo horizonte
+belo_horizonte = dummy[dummy$city == "belo horizonte",]
+belo_horizonte = table(belo_horizonte$product_category) %>% as.data.frame() %>% arrange(desc(Freq))
+belo_horizonte$city = "belo horizonte" #add an extra city column
+
+#brasilia
+brasilia = dummy[dummy$city == "brasilia",]
+brasilia = table(brasilia$product_category) %>% as.data.frame() %>% arrange(desc(Freq))
+brasilia$city = "brasilia"
+
+#curitiba
+curitiba = dummy[dummy$city == "curitiba",]
+curitiba = table(curitiba$product_category) %>% as.data.frame() %>% arrange(desc(Freq))
+curitiba$city = "curitiba" 
+
+#rio de janeiro
+rio_de_janeiro = dummy[dummy$city == "rio de janeiro",]
+rio_de_janeiro = table(rio_de_janeiro$product_category) %>% as.data.frame() %>% arrange(desc(Freq))
+rio_de_janeiro$city = "rio_de janeiro"
+
+#sao paulo
+sao_paulo = dummy[dummy$city == "sao paulo",]
+sao_paulo = table(sao_paulo$product_category) %>% as.data.frame() %>% arrange(desc(Freq))
+sao_paulo$city = "sao_paulo"
+
+#combine the top from each city
+top_category_city = belo_horizonte[1,]
+top_category_city = rbind(top_category_city,brasilia[1,])
+top_category_city = rbind(top_category_city,curitiba[1,])
+top_category_city = rbind(top_category_city,rio_de_janeiro[1,])
+top_category_city = rbind(top_category_city,sao_paulo[1,])
+
+
+
+
+
+#FIND OUT HOW MUCH EACH STATE/CITY HAS SPENT
+
+dummy = dataset[dataset$state == top_states,]
+
+table(dummy$product_category)
+
+#GET SPENDING FOR EACH STATE
+
+#SP
+sp = dummy[dummy$state == "SP",]
+state_spending = data.frame(matrix(ncol = 2,nrow = 0))#make a new dataframe and save all the total spendings
+colnames(state_spending) = c("total_spending","state")
+state_spending[nrow(state_spending)+1,] = c(sum(sp$price),"SP")
+
+#RJ
+rj = dummy[dummy$state == "RJ",]
+state_spending[nrow(state_spending)+1,] = c(sum(rj$price),"RJ")
+
+
+#MG
+mg = dummy[dummy$state == "MG",]
+state_spending[nrow(state_spending)+1,] = c(sum(mg$price),"MG")
+
+#RS
+rs = dummy[dummy$state == "RS",]
+state_spending[nrow(state_spending)+1,] = c(sum(rs$price),"RS")
+sum(rs$price)
+
+#PR
+pr = dummy[dummy$state == "PR",]
+state_spending[nrow(state_spending)+1,] = c(sum(pr$price),"PR")
+
+
+#SPENDING FOR EACH CITY
+top_cities = c("belo horizonte","brasilia","curitiba","rio de janeiro","sao paulo")
+dummy = dataset[dataset$city == top_cities,]
+
+#belo horizonte
+belo_horizonte = dummy[dummy$city == "belo horizonte",]
+city_spending = data.frame(matrix(ncol = 2,nrow = 0))#make a new dataframe and save all the total spendings
+colnames(city_spending) = c("total_spending","city") #name our columns
+city_spending[nrow(city_spending)+1,] = c(sum(belo_horizonte$price),"belo horizonte")
+
+#brasilia
+brasilia = dummy[dummy$city == "brasilia",]
+city_spending[nrow(city_spending)+1,] = c(sum(brasilia$price),"brasilia")
+
+#curitiba
+curitiba = dummy[dummy$city == "curitiba",]
+city_spending[nrow(city_spending)+1,] = c(sum(curitiba$price),"curitiba")
+
+#rio de janeiro
+rio_de_janeiro = dummy[dummy$city == "rio de janeiro",]
+city_spending[nrow(city_spending)+1,] = c(sum(rio_de_janeiro$price),"rio de janeiro")
+
+#sao paulo
+sao_paulo = dummy[dummy$city == "sao paulo",]
+city_spending[nrow(city_spending)+1,] = c(sum(sao_paulo$price),"sao paulo")
+
+library(ggplot2)
+ggplot(data = city_spending,
+       aes(x = city, y = total_spending,fill = city)) + 
+  geom_bar(stat="identity") + 
+  theme(axis.title.x = element_text(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())
+
+
+```
+
