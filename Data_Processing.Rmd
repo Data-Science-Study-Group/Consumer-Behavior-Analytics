@@ -9,6 +9,7 @@ output: html_document
 library(tidyverse)
 library(ggplot2)
 library(date)
+library(dplyr)
 customers = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_customers_dataset.csv")
 geolocation = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_geolocation_dataset.csv")
 order_items = read.csv("~/GitHub/datasci_proj/brazilian-ecommerce_ver6/olist_order_items_dataset.csv")
@@ -65,15 +66,18 @@ We see that there is an outlier at the max of 6735. Maybe we should exclude this
 
 #What the correlation between customer and price?
 ```{r}
-merge(orders,order_items, by="order_id") -> df1
+df1 <- merge(orders,order_items, by="order_id")
 df1 <- merge(df1, customers, by="customer_id")
 ```
 
 Link price to customer + plot
 ```{r}
-df1 %>% 
-  filter(price < 7000 ) -> df2
-ggplot(df2, aes(x=customer_id, y=price)) + geom_point() + geom_smooth()
+df2 <- df1 %>% 
+  filter(price < 7000 )
+
+ggplot(df2, aes(x=customers_id, y=price)) + 
+  geom_point() + 
+  geom_smooth()
 ```
 Analysis: Looking at the plot we see that the majority of the purchases were under $2000, a few points are greater than $6k which we might want to exclude.
 
@@ -81,6 +85,7 @@ Analysis: Looking at the plot we see that the majority of the purchases were und
 Let's find out with payments dataset for y val, and x = order_purchase_timestamp.
 ```{r}
 df <- df1
+
 qplot(x=df$order_purchase_timestamp,y=df$price,data=df, color="red")
 ```
 Analysis: 
@@ -91,20 +96,20 @@ Group by top 5 cities
 group_by_city_df <- df1
 
 #group by city
-group_by_city_df %>%
-group_by(customer_city) -> group_by_city_df
+group_by_city_df <- group_by_city_df %>%
+group_by(customer_city)
 
 #remap df to have city at front
-group_by_city_df %>% 
-    select(customer_city,everything()) -> group_by_city_df
+group_by_city_df <- group_by_city_df %>% 
+    select(customer_city,everything())
 
 #find the frequency of orders from each city
-table(group_by_city_df$customer_city) %>%
+tb_city <- table(group_by_city_df$customer_city) %>%
   as.data.frame() %>%
-  arrange(desc(Freq)) -> tb_city
+  arrange(desc(Freq))
 
 #only show top 5 cities with most frequent orders
-tb_city[1:5,] -> tb_city
+tb_city <- tb_city[1:5,]
 
 #see top 5 cities as a plot
 ggplot(data=tb_city, aes(x=order(Var1),y=Freq,color=Var1)) + geom_col()
@@ -118,10 +123,10 @@ cust_city_5 <- df1
 target <- c("belo horizonte", "brasilia", "curitiba","rio de janeiro","sao paulo")
 
 #filter known top 5 cities
-cust_city_5 %>%
-  filter(customer_city %in% target) -> cust_city_5
+cust_city_5 <- cust_city_5 %>%
+  filter(customer_city %in% target)
 
-cust_city_5
+View(cust_city_5)
 
 ggplot(cust_city_5,aes(x=cust_city_5$customer_id,y=cust_city_5$price,color=customer_city)) + facet_grid(cols=vars(customer_city)) + geom_point()
 ```
@@ -129,23 +134,25 @@ ggplot(cust_city_5,aes(x=cust_city_5$customer_id,y=cust_city_5$price,color=custo
 ```{r}
 just_top <- cust_city_5
 
-just_top %>%
-  filter(customer_city %in% c("sao paulo")) -> just_top
-just_top
+just_top <- just_top %>%
+  filter(customer_city %in% c("sao paulo"))
+
+View(just_top)
 
 regressor <- lm(just_top$price ~ just_top$customer_id)
 ```
 ```{r}
 bott_city <- cust_city_5
 
-bott_city %>%
-  filter(customer_city %in% c("curitiba")) -> bott_city
-bott_city %>%
-  filter(price < 200) -> bott_city
+bott_city <- bott_city %>%
+  filter(customer_city %in% c("curitiba"))
+
+bott_city <- bott_city %>%
+  filter(price < 200)
 
 qplot(data=bott_city,x=bott_city$order_id,y=bott_city$price)
 
-test = bott_city
+test <- bott_city
 
 ggplot(data=bott_city,aes(x=as.numeric(order_purchase_timestamp),y=price)) + 
   geom_point()+
@@ -153,7 +160,7 @@ ggplot(data=bott_city,aes(x=as.numeric(order_purchase_timestamp),y=price)) +
 
 qplot(data=test,x=as.numeric(order_purchase_timestamp),y=price, geom = c("point","smooth"))
       
-regressor <- lm(bott_city$price ~ bott_city$)
+regressor <- lm(bott_city$price ~ as.numeric(bott_city$order_purchase_timestamp))
 summary(regressor)
 plot(regressor)
 ```
@@ -162,10 +169,10 @@ plot(regressor)
 
 Curious of the frequency of buyers from various zip codes.
 ```{r}
-as.data.frame(table(customers$customer_zip_code_prefix)) %>% 
-  arrange(desc(Freq)) -> zip_df
+zip_df <- as.data.frame(table(customers$customer_zip_code_prefix)) %>% 
+  arrange(desc(Freq))
 
-zip_df
+View(zip_df)
 
 ggplot(zip_df, aes(x=zip_df$Var1)) + geom_bar()
 
@@ -177,24 +184,24 @@ ggplot(data.frame(animals), aes(x=animals)) + geom_bar()
 #Price to zipcode
 
 ```{r}
-df = data.frame(customers$customer_id,order_payments$payment_type)
-df
+df <- data.frame(customers$customer_id,order_payments$payment_type)
+
 table(df$order_payments.payment_type) %>%
 barplot()
 
-df %>% mutate(orders$customer_id, customers$customer_city, customers$customer_state) -> df
+df <- df %>% mutate(orders$customer_id, customers$customer_city, customers$customer_state)
 summary(df)
 
 qplot(x = df$`customers$customer_city`,y = df$order_payments.payment_type)
 
-table(df$`customers$customer_city`, df$order_payments.payment_type) -> tbl_1
-as.data.frame.matrix(tbl_1) -> new_df
+tbl_1 <- table(df$`customers$customer_city`, df$order_payments.payment_type)
+new_df <- as.data.frame.matrix(tbl_1)
 
 View(new_df)
 
-rownames_to_column(df = new_df,var = "city_name") %>%
+ df_debitcard <- rownames_to_column(df = new_df,var = "city_name") %>%
   filter(debit_card > 0) %>% 
-  column_to_rownames('city_name') -> df_debitcard
+  column_to_rownames('city_name')
 
 
 #barplot(t(as.matrix(df_debitcard)), beside = TRUE )
@@ -223,20 +230,20 @@ df_q3_2018<- df1
 
 orders_Q1 <- orders #set Q1 with orders
 #split orders purchased into distinct columns
-orders_Q1$order_purchase_timestamp %>%
-  str_split_fixed(pattern = " ", 2) -> temp
+temp <- orders_Q1$order_purchase_timestamp %>%
+  str_split_fixed(pattern = " ", 2)
 
 #keep only dates
-temp[,1] -> temp
+temp <- temp[,1]
 
 #push back onto Q1
-mutate(orders_Q1, temp) -> orders_Q1
+orders_Q1 <- mutate(orders_Q1, temp)
 View(orders_Q1)
 class(orders_Q1$temp)#is character type, must be date type
 
 orders_Q1$temp <- as.Date(orders_Q1$temp, format= "%Y-%m-%d")
 #sort out only Q1 of 2017
-subset(orders_Q1, temp > "2014-01-01" & temp < "2017-01-01") -> 
+orders_Q1 <- subset(orders_Q1, temp > "2014-01-01" & temp < "2017-01-01")
 
 summary(orders_Q1)
 ```
@@ -351,4 +358,3 @@ ggplot(data=plot_state_freq,aes(x=reorder(State,-Frequency),y=Frequency)) + geom
 
 ```
 
-carlos test
