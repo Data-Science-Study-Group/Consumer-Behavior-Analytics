@@ -1,7 +1,7 @@
 #using dplyr for data manipulation
 library("dplyr")
 
-#importing data from project github for universal access
+#importing data from project github for public accessibility
 df_geo_loc = read.csv("https://raw.githubusercontent.com/troykirin/datasci_proj/master/brazilian-ecommerce/geolocation_olist_public_dataset.csv")
 df_olist_classified = read.csv("https://raw.githubusercontent.com/troykirin/datasci_proj/master/brazilian-ecommerce/olist_classified_public_dataset.csv")
 df_olist_v2 = read.csv("https://raw.githubusercontent.com/troykirin/datasci_proj/master/brazilian-ecommerce/olist_public_dataset_v2.csv")
